@@ -3,6 +3,8 @@
 
 #include <guiddef.h>
 
+#include "ScpDevice.h"
+
 namespace Hook
 {
 	class Looper
@@ -10,7 +12,7 @@ namespace Hook
 	public:
 		Looper(GUID activeGUID);
 
-		bool loop();
+		bool loop(Scp::VirtualDevice& vjd);
 
 	private:
 		GUID mGuid;

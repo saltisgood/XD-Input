@@ -56,7 +56,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>xinput9_1_0.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;xinput9_1_0.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -80,9 +80,11 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Controller.h" />
     <ClInclude Include="HookDXUtil.h" />
     <ClInclude Include="Looper.h" />
     <ClInclude Include="MicrosoftCode.h" />
+    <ClInclude Include="ScpDevice.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Util.h" />
@@ -92,6 +94,7 @@
     <ClCompile Include="HookDXUtil.cpp" />
     <ClCompile Include="Looper.cpp" />
     <ClCompile Include="MicrosoftCode.cpp" />
+    <ClCompile Include="ScpDevice.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>

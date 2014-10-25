@@ -7,15 +7,7 @@
 #include "Looper.h"
 #include "MicrosoftCode.h"
 #include "Util.h"
-
-/*
-bool checkControllerConnected(DWORD controllerNum)
-{
-	XINPUT_STATE state;
-	ZeroMemory(&state, sizeof(XINPUT_STATE));
-
-	return XInputGetState(controllerNum, &state) == ERROR_SUCCESS;
-} */
+#include "ScpDevice.h"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -40,8 +32,16 @@ int _tmain(int argc, _TCHAR* argv[])
 		return EXIT_SUCCESS;
 	}
 
+	Hook::Scp::BusDevice bus;
+	
+	if (!bus.open() || !bus.start())
+	{
+		Hook::errorMessage("Failed to open stream to ScpServer!");
+		return EXIT_FAILURE;
+	}
+
 	Hook::Looper looper(dInputs.front());
-	looper.loop();
+	looper.loop(bus.retrieveDevice());
 
 	return EXIT_SUCCESS;
 }
