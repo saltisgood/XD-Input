@@ -111,6 +111,11 @@ bool Hook::Looper::loop(Hook::Scp::VirtualDevice &vjd)
 		translateState(state, myState);
 
 		vjd.feed(myState);
+
+		if (GetAsyncKeyState(VK_END))
+		{
+			break;
+		}
 	}
 
 	controller->Unacquire();

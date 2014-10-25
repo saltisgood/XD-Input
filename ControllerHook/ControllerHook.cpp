@@ -9,6 +9,8 @@
 #include "Util.h"
 #include "ScpDevice.h"
 
+#include <iostream>
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	if (!Hook::DInput8_Util::create())
@@ -19,6 +21,8 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	std::forward_list<GUID> xInputs;
 	std::forward_list<GUID> dInputs;
+
+	std::cout << "Searching for DirectInput controllers..." << std::endl;
 
 	if (!Hook::genControllerList(xInputs, dInputs))
 	{
@@ -32,15 +36,29 @@ int _tmain(int argc, _TCHAR* argv[])
 		return EXIT_SUCCESS;
 	}
 
+	GUID guid = dInputs.front();
+
+	std::cout << std::hex << std::noshowbase << "Found DirectInput controller with GUID: ";
+
+	OLECHAR *bstrGuid;
+	StringFromCLSID(guid, &bstrGuid);
+
+	std::wcout << bstrGuid << std::endl;
+
+	CoTaskMemFree(bstrGuid);
+
 	Hook::Scp::BusDevice bus;
 	
+	std::cout << "Connecting to ScpServer..." << std::endl;
 	if (!bus.open() || !bus.start())
 	{
 		Hook::errorMessage("Failed to open stream to ScpServer!");
 		return EXIT_FAILURE;
 	}
 
-	Hook::Looper looper(dInputs.front());
+	std::cout << "Connection successful. Starting controller translation.\n\nPress END to cancel..." << std::endl;
+
+	Hook::Looper looper(guid);
 	looper.loop(bus.retrieveDevice());
 
 	return EXIT_SUCCESS;
