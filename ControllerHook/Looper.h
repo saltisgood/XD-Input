@@ -1,22 +1,12 @@
 #ifndef __CTRLHOOK_LOOPER_H_
 #define __CTRLHOOK_LOOPER_H_
 
-#include <guiddef.h>
-
+#include "HID_Util.h"
 #include "ScpDevice.h"
 
 namespace Hook
 {
-	class Looper
-	{
-	public:
-		Looper(GUID activeGUID);
-
-		bool loop(Scp::VirtualDevice& vjd);
-
-	private:
-		GUID mGuid;
-	};
+	void loop(Hid::HidControllerDevice &realDevice, Scp::VirtualDevice &virtualDevice);
 }
 
 #endif
