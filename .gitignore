@@ -177,3 +177,4 @@ FakesAssemblies/
 *.ign
 
 # Project Specific
+ControllerHook/*.config

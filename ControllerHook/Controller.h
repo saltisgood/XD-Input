@@ -2,6 +2,7 @@
 #define __CTRLHOOK_CONTROLLER_H_
 
 #include <cstdint>
+#include <string>
 
 namespace Hook
 {
@@ -9,7 +10,7 @@ namespace Hook
 	{
 		BUTTON_Y = 0, BUTTON_B = 1, BUTTON_A = 2, BUTTON_X = 3, BUTTON_LB = 4, BUTTON_RB = 5,
 		BUTTON_LT = 6, BUTTON_RT = 7, BUTTON_BACK = 8, BUTTON_START = 9, BUTTON_LS = 10,
-		BUTTON_RS = 11
+		BUTTON_RS = 11, INVALID
 	};
 	const static unsigned int NUM_BUTTONS = 12;
 
@@ -69,6 +70,9 @@ namespace Hook
 	static_assert(sizeof(ControllerState) == 28, "ControllerState larger than 28 bytes!");
 
 	void initialiseState(ControllerState& state, unsigned int controllerNum);
+
+	Buttons parseButtonString(const std::string& str);
+	const std::string& getButtonString(Buttons butt);
 
 #pragma region inlines
 

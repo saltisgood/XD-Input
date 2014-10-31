@@ -10,6 +10,9 @@ namespace Hook
 {
 	namespace Scp
 	{
+		// Fix up the differences for the ScpDevice's ControllerState
+		void fixDiscrepancies(ControllerState &state);
+
 		class BusDevice;
 
 		class VirtualDevice
@@ -60,6 +63,18 @@ namespace Hook
 			void *mFileHandle;
 			VirtualDevice mDevice;
 		};
+
+#pragma region inlines
+
+		inline void fixDiscrepancies(ControllerState &state)
+		{
+			uint8_t swap(state.button_primary.button_y);
+			state.button_primary.button_y = state.button_primary.button_x;
+			state.button_primary.button_x = state.button_primary.button_a;
+			state.button_primary.button_a = swap;
+		}
+
+#pragma endregion
 	}
 }
 

@@ -94,6 +94,7 @@
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Controller.cpp" />
     <ClCompile Include="ControllerHook.cpp" />
     <ClCompile Include="HidDevice.cpp" />
     <ClCompile Include="HID_Util.cpp" />

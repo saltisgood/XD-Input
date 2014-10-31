@@ -1,6 +1,7 @@
 #include "HID_Util.h"
 
 #include "Controller.h"
+#include "ScpDevice.h"
 
 #include <Windows.h>
 
@@ -168,6 +169,8 @@ Hook::ControllerState HidControllerDevice::parseData()
 
 	state.right_stick_x = (buff[4] << 8) - SHRT_MAX;
 	state.right_stick_y = - static_cast<int16_t>((buff[5] << 8) - SHRT_MAX);
+
+	Scp::fixDiscrepancies(state);
 
 	return state;
 }

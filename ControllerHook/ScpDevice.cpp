@@ -296,25 +296,6 @@ void VirtualDevice::feed(Hook::ControllerState &state)
 {
 	BYTE output[8];
 
-	
-#ifdef HOOK_NON_DARK_SOULS
-	uint8_t swap(state.button_primary.button_y);
-	state.button_primary.button_y = state.button_primary.button_x;
-	state.button_primary.button_x = state.button_primary.button_a;
-	state.button_primary.button_a = swap;
-
-#else
-
-	uint8_t swap(state.left_trigger);
-	state.left_trigger = state.button_primary.left_shoulder ? UCHAR_MAX : 0;
-	state.button_primary.left_shoulder = swap ? 1 : 0;
-
-	swap = state.right_trigger;
-	state.right_trigger = state.button_primary.right_shoulder ? UCHAR_MAX : 0;
-	state.button_primary.right_shoulder = swap ? 1 : 0;
-	
-#endif
-
 	if (!mParent.transfer(&state, sizeof(Hook::ControllerState), output, 8))
 	{
 		// Uh-oh!
