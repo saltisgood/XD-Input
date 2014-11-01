@@ -10,56 +10,9 @@ using namespace Hook::Hid;
 
 const GUID HID_GUID = GUID_DEVINTERFACE_HID;
 
-std::forward_list<HidDevice> Hook::Hid::enumerateHIDDevices(int vendId, int prodIds, ...)
+std::forward_list<HidDevice> Hook::Hid::enumerateHIDDevices()
 {
-	return enumerateDevices(HID_GUID, vendId, prodIds);
-}
-
-std::forward_list<HidDevice> Hook::Hid::enumerateHIDDevicesAlt()
-{
-	return enumerateDevicesAlt(HID_GUID);
-}
-
-std::forward_list<HidDevice> Hook::Hid::enumerateDevices(const GUID &target, int vendId, int prodIds, ...)
-{
-	std::forward_list<HidDevice> rtList;
-
-	HDEVINFO deviceInfoSet = SetupDiGetClassDevs(&target, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
-
-	INT32 memberIndex = 0;
-	DWORD bufferSize = 0;
-
-	SP_DEVICE_INTERFACE_DATA deviceInterfaceData;
-	deviceInterfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
-	SP_DEVINFO_DATA da;
-	da.cbSize = sizeof(SP_DEVINFO_DATA);
-
-	while (SetupDiEnumDeviceInterfaces(deviceInfoSet, NULL, &target, memberIndex, &deviceInterfaceData))
-	{
-		SetupDiGetDeviceInterfaceDetail(deviceInfoSet, &deviceInterfaceData, NULL, 0, &bufferSize, &da);
-
-		PSP_DEVICE_INTERFACE_DETAIL_DATA detailDataBuffer = reinterpret_cast<PSP_DEVICE_INTERFACE_DETAIL_DATA>(new char[bufferSize]);
-		detailDataBuffer->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
-
-		if (SetupDiGetDeviceInterfaceDetail(deviceInfoSet, &deviceInterfaceData, detailDataBuffer, bufferSize, &bufferSize, &da))
-		{
-			HidDevice dev;
-			dev.path.assign(detailDataBuffer->DevicePath);
-
-			rtList.insert_after(rtList.before_begin(), std::move(dev));
-
-			delete detailDataBuffer;
-		}
-
-		++memberIndex;
-	}
-
-	if (deviceInfoSet)
-	{
-		SetupDiDestroyDeviceInfoList(deviceInfoSet);
-	}
-
-	return rtList;
+	return enumerateDevices(HID_GUID);
 }
 
 std::wstring getDevicePath(HDEVINFO deviceInfoSet, SP_DEVICE_INTERFACE_DATA &deviceInterfaceData)
@@ -131,7 +84,7 @@ std::wstring getDeviceDescription(HDEVINFO deviceInfoSet, SP_DEVINFO_DATA &devic
 	return std::wstring();
 }
 
-std::forward_list<HidDevice> Hook::Hid::enumerateDevicesAlt(const GUID &guid)
+std::forward_list<HidDevice> Hook::Hid::enumerateDevices(const GUID &guid)
 {
 	std::forward_list<HidDevice> rtList;
 

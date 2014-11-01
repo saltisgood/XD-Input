@@ -85,6 +85,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Config.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="HID_Util.h" />
     <ClInclude Include="Looper.h" />
@@ -94,6 +95,7 @@
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="ControllerHook.cpp" />
     <ClCompile Include="HidDevice.cpp" />

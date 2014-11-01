@@ -21,6 +21,7 @@ namespace Hook
 		{
 			typedef void * WIN_HANDLE;
 
+		public:
 			struct HIDD_ATTRIBUTES
 			{
 				unsigned long Size;
@@ -49,6 +50,7 @@ namespace Hook
 				unsigned short NumberFeatureDataIndices;
 			};
 
+		private:
 			static WIN_HANDLE openHandle(const wchar_t *path, bool isExclusive);
 			static HIDD_ATTRIBUTES getDeviceAttributes(WIN_HANDLE handle);
 			static HIDP_CAPS getDeviceCapabilities(WIN_HANDLE handle);
@@ -64,6 +66,9 @@ namespace Hook
 
 			ControllerState parseData();
 
+			const HIDD_ATTRIBUTES &getAttributes() const;
+			const HIDP_CAPS &getCapabilities() const;
+
 		private:
 			HidDevice mDetails;
 			HIDD_ATTRIBUTES mAttrs;
@@ -75,12 +80,22 @@ namespace Hook
 			unsigned char *mInputData;
 		};
 
-		std::forward_list<HidDevice> enumerateDevices(const GUID &guid, int vendId, int prodId, ...);
+		std::forward_list<HidDevice> enumerateDevices(const GUID &guid);
+		std::forward_list<HidDevice> enumerateHIDDevices();
 
-		std::forward_list<HidDevice> enumerateHIDDevices(int vendId, int prodId, ...);
+#pragma region inlines
 
-		std::forward_list<HidDevice> enumerateDevicesAlt(const GUID &guid);
-		std::forward_list<HidDevice> enumerateHIDDevicesAlt();
+		inline const HidControllerDevice::HIDD_ATTRIBUTES &HidControllerDevice::getAttributes() const
+		{
+			return mAttrs;
+		}
+
+		inline const HidControllerDevice::HIDP_CAPS &HidControllerDevice::getCapabilities() const
+		{
+			return mCapabilities;
+		}
+
+#pragma endregion
 	}
 }
 

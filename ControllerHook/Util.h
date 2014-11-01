@@ -8,6 +8,8 @@ namespace Hook
 	void errorMessage(const std::string& mesg);
 
 	void pause();
+
+	char getChar();
 }
 
 #endif
