@@ -2,6 +2,7 @@
 #define __CTRLHOOK_CONFIG_H_
 
 #include <string>
+#include <forward_list>
 
 namespace Hook
 {
@@ -31,6 +32,11 @@ namespace Hook
 		void setFavouriteVendorID(unsigned short vendorId);
 		void setFavouriteProductID(unsigned short productId);
 
+		bool hasProcessList() const;
+		const std::forward_list<std::wstring> &getProcessList() const;
+
+		bool shouldEndOnGameProcDeath() const;
+
 	private:
 		static Config *sInst;
 
@@ -39,6 +45,10 @@ namespace Hook
 		bool mHasFavDevice;
 		unsigned short mFavVendor;
 		unsigned short mFavProd;
+
+		std::forward_list<std::wstring> mProcList;
+
+		bool mEndWithGameProc;
 	};
 
 #pragma region inlines
@@ -84,6 +94,21 @@ namespace Hook
 		mFavProd = prod;
 		mHasFavDevice = true;
 		mModified = true;
+	}
+
+	inline bool Config::hasProcessList() const
+	{
+		return !mProcList.empty();
+	}
+
+	inline const std::forward_list<std::wstring> &Config::getProcessList() const
+	{
+		return mProcList;
+	}
+
+	inline bool Config::shouldEndOnGameProcDeath() const
+	{
+		return mEndWithGameProc;
 	}
 
 #pragma endregion

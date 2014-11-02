@@ -39,6 +39,8 @@ int _tmain(int argc, _TCHAR* argv[])
 				{
 					goto endsearch;
 				}
+
+				++devIt;
 			}
 
 			std::cout << "Favourite device not connected! Listing connected devices:" << std::endl;

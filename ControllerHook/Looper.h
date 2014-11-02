@@ -14,6 +14,10 @@ namespace Hook
 		const static std::string DEFAULT_PATH;
 
 		static Remapper create(const std::string& filePath);
+		static Remapper create(const std::wstring &filePath);
+
+		static bool reread(const std::wstring &filePath, Remapper &mapper);
+
 		static void printTemplate(const std::string& filePath);
 
 	private:

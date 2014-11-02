@@ -89,6 +89,7 @@
     <ClInclude Include="Controller.h" />
     <ClInclude Include="HID_Util.h" />
     <ClInclude Include="Looper.h" />
+    <ClInclude Include="Processes.h" />
     <ClInclude Include="ScpDevice.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -101,6 +102,7 @@
     <ClCompile Include="HidDevice.cpp" />
     <ClCompile Include="HID_Util.cpp" />
     <ClCompile Include="Looper.cpp" />
+    <ClCompile Include="Processes.cpp" />
     <ClCompile Include="ScpDevice.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Util.cpp" />

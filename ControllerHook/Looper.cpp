@@ -1,10 +1,14 @@
 #include "Looper.h"
 
 #include "Util.h"
+#include "Config.h"
+#include "Processes.h"
 
 #include <Windows.h>
 #include <fstream>
 #include <iostream>
+#include <thread>
+#include <atomic>
 
 #pragma region Helper
 
@@ -94,9 +98,21 @@ inline void setButtonValue(Hook::ControllerState &state, Hook::Buttons butt, uin
 
 const std::string Hook::Remapper::DEFAULT_PATH = "keys.config";
 
-Hook::Remapper Hook::Remapper::create(const std::string& filePath)
+Hook::Remapper Hook::Remapper::create(const std::wstring &filePath)
+{
+	return create(wideToByteString(filePath));
+}
+
+Hook::Remapper Hook::Remapper::create(const std::string& path)
 {
 	Remapper rtn;
+
+	std::string filePath(path);
+
+	if (filePath.find(".config") == std::string::npos)
+	{
+		filePath += ".config";
+	}
 
 	std::ifstream file(filePath);
 
@@ -162,6 +178,27 @@ Hook::Remapper Hook::Remapper::create(const std::string& filePath)
 	return rtn;
 }
 
+bool Hook::Remapper::reread(const std::wstring &path, Hook::Remapper &map)
+{
+	std::wstring filePath(path);
+
+	if (filePath.find(L".config") == std::string::npos)
+	{
+		filePath += L".config";
+	}
+
+	std::ifstream file(filePath);
+	if (file.is_open())
+	{
+		file.close();
+
+		map = create(filePath);
+		return true;
+	}
+
+	return false;
+}
+
 void Hook::Remapper::printTemplate(const std::string& path)
 {
 	std::ofstream file(path);
@@ -196,15 +233,90 @@ void Hook::Remapper::remapPriv(Hook::ControllerState &state) const
 
 #pragma endregion
 
+std::forward_list<std::wstring>::const_iterator procWaitLoop(const std::forward_list<std::wstring> &procList)
+{
+	auto start(procList.cbegin());
+	auto end(procList.cend());
+	auto iter(Hook::checkProcessActive(start, end));
+
+	while (iter == end)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+		if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState(VK_END) && GetAsyncKeyState(VK_SHIFT))
+		{
+			break;
+		}
+
+		iter = Hook::checkProcessActive(start, end);
+	}
+
+	return iter;
+}
+
+std::atomic<bool> earlyDie(false);
+
+inline void cleanupThread(std::thread &t)
+{
+	if (t.joinable())
+	{
+		t.join();
+	}
+	else if (t.get_id() != std::thread::id())
+	{
+		t.detach();
+	}
+}
+
+void processCheckerThreadLoop(std::wstring processName)
+{
+	while (!earlyDie.load() && Hook::checkProcessAlive(processName))
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}
+
+	earlyDie.store(true);
+}
+
 void Hook::loop(Hook::Hid::HidControllerDevice &realD, Hook::Scp::VirtualDevice &vjd)
 {
 	auto mapper(Remapper::create(Remapper::DEFAULT_PATH));
 
-	std::cout << "\nSetup successful! Beginning controller translation. Press CTRL + END to end." << std::endl;
+	bool hasProcList(Config::get()->hasProcessList());
+	const auto &procList(Config::get()->getProcessList());
+
+	bool suicide(hasProcList ? Config::get()->shouldEndOnGameProcDeath() : false);
+	std::thread worker;
+
+	std::wstring activeProc(byteToWideString(Remapper::DEFAULT_PATH));
+
+	if (!hasProcList)
+	{
+		std::cout << "\nSetup successful! Beginning controller translation. Press CTRL + END to quit. Press CTRL + HOME to re-read button mappings." << std::endl;
+	}
+	else
+	{
+		std::cout << "\nSetup successful! Awaiting game startup... Press CTRL + SHIFT + END to quit." << std::endl;
+		auto procIter(procWaitLoop(procList));
+
+		if (procIter == procList.cend())
+		{
+			return;
+		}
+
+		activeProc = *procIter;
+		std::wcout << "Detected startup of " << activeProc << "." << std::endl;
+
+		mapper = Remapper::create(activeProc);
+
+		std::wcout << "Beginning controller translation. Press CTRL + END to quit. Press CTRL + HOME to re-read button mappings." << std::endl;
+
+		worker = std::thread(processCheckerThreadLoop, activeProc);
+	}
 
 	for (;;)
 	{
-		Sleep(1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 		realD.pullData();
 
@@ -214,9 +326,51 @@ void Hook::loop(Hook::Hid::HidControllerDevice &realD, Hook::Scp::VirtualDevice 
 
 		vjd.feed(state);
 
+		if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState(VK_HOME))
+		{
+			std::cout << "Re-reading button mappings from file...\n";
+			Remapper::reread(activeProc, mapper);
+		}
 		if (GetAsyncKeyState(VK_END) && GetAsyncKeyState(VK_CONTROL))
 		{
+			earlyDie.store(true);
+
+			cleanupThread(worker);
+
+			if (hasProcList)
+			{
+				goto rewait;
+			}
 			break;
+		}
+		else if (hasProcList && earlyDie.load())
+		{
+			if (suicide)
+			{
+				cleanupThread(worker);
+				std::cout << "Game process ended. Terminating controller translation and quitting." << std::endl;
+				break;
+			}
+
+			std::cout << "Game process ended. Terminating controller translation." << std::endl;
+
+		rewait:
+			cleanupThread(worker);
+
+			std::cout << "Awaiting game startup... Press CTRL + SHIFT + END to quit." << std::endl;
+
+			auto procIter(procWaitLoop(procList));
+
+			if (procIter == procList.cend())
+			{
+				break;
+			}
+
+			activeProc = *procIter;
+			mapper = Remapper::create(activeProc);
+
+			earlyDie.store(false);
+			worker = std::thread(processCheckerThreadLoop, *procIter);
 		}
 	}
 }

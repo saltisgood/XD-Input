@@ -10,6 +10,9 @@ namespace Hook
 	void pause();
 
 	char getChar();
+
+	std::string wideToByteString(const std::wstring &str);
+	std::wstring byteToWideString(const std::string &str);
 }
 
 #endif
