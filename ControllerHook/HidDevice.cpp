@@ -108,21 +108,32 @@ void HidControllerDevice::pullData()
 	BOOL result = ReadFile(mReadHandle, mInputData, mCapabilities.InputReportByteLength, &bytesRead, NULL);
 }
 
+// NOTE!
+// This function is designed to work with 1 particular device! It is NOT guaranteed to
+// work with any others! Proceed with caution and check different devices for different
+// data
 Hook::ControllerState HidControllerDevice::parseData()
 {
 	ControllerState state;
 	ZeroMemory(&state, sizeof(ControllerState));
 	initialiseState(state, 1);
 
-	BYTE buff[9];
+#ifdef _DEBUG
+	// For debug purposes it's nice to be able to see the whole of the array
+	#define BUFF buff
+	BYTE BUFF[9];
 
 	for (int i = 0; i < 9; ++i)
 	{
-		buff[i] = mInputData[i];
+		BUFF[i] = mInputData[i];
 	}
+#else
+	#define BUFF mInputData
+#endif
 
-#define HOOK_BIT_CHECK(byteNo, bitNo) (buff[byteNo] & (0x1 << bitNo))
-#define HOOK_BIT_SET(byteNo, bitNo) ((buff[byteNo] & (0x1 << bitNo)) >> bitNo)
+#define HOOK_BIT_CHECK(byteNo, bitNo) (BUFF[byteNo] & (0x1 << bitNo))
+#define HOOK_BIT_SET(byteNo, bitNo) ((BUFF[byteNo] & (0x1 << bitNo)) >> bitNo)
+
 	state.button_primary.button_y = HOOK_BIT_SET(6, 4);
 	state.button_primary.button_b = HOOK_BIT_SET(6, 5);
 	state.button_primary.button_a = HOOK_BIT_SET(6, 6);
@@ -140,7 +151,8 @@ Hook::ControllerState HidControllerDevice::parseData()
 	state.button_secondary.left_stick = HOOK_BIT_SET(7, 6);
 	state.button_secondary.right_stick = HOOK_BIT_SET(7, 7);
 
-	BYTE hatByte = buff[6] & 0xF;
+	BYTE hatByte(BUFF[6] & 0xF);
+
 	if (hatByte != 0xF)
 	{
 		if (hatByte < 0x2 || hatByte > 0x6)
@@ -164,11 +176,11 @@ Hook::ControllerState HidControllerDevice::parseData()
 		}
 	}
 
-	state.left_stick_x = (buff[1] << 8) - SHRT_MAX;
-	state.left_stick_y = - static_cast<int16_t>((buff[2] << 8) - SHRT_MAX);
+	state.left_stick_x = (BUFF[1] << 8) - SHRT_MAX;
+	state.left_stick_y = - static_cast<int16_t>((BUFF[2] << 8) - SHRT_MAX);
 
-	state.right_stick_x = (buff[4] << 8) - SHRT_MAX;
-	state.right_stick_y = - static_cast<int16_t>((buff[5] << 8) - SHRT_MAX);
+	state.right_stick_x = (BUFF[4] << 8) - SHRT_MAX;
+	state.right_stick_y = - static_cast<int16_t>((BUFF[5] << 8) - SHRT_MAX);
 
 	Scp::fixDiscrepancies(state);
 

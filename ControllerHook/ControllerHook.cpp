@@ -15,6 +15,7 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	// Get the list of HIDs
 	auto list = Hook::Hid::enumerateHIDDevices();
 
 	if (list.empty())
@@ -26,17 +27,21 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		auto devIt(list.cbegin());
 
+		// Create the Config instance and check if there is a fav device
 		if (Hook::Config::create() && Hook::Config::get()->hasFavouriteDevice())
 		{
+			// If so, grab the details
 			auto vendor(Hook::Config::get()->getFavouriteVendorID());
 			auto product(Hook::Config::get()->getFavouriteProductID());
 
+			// And check whether any connected devices match
 			while (devIt != list.cend())
 			{
 				Hook::Hid::HidControllerDevice dev(*devIt);
 
 				if (dev.getAttributes().VendorID == vendor && dev.getAttributes().ProductID == product)
 				{
+					// Match found, continue on
 					goto endsearch;
 				}
 
@@ -46,16 +51,20 @@ int _tmain(int argc, _TCHAR* argv[])
 			std::cout << "Favourite device not connected! Listing connected devices:" << std::endl;
 
 			devIt = list.cbegin();
+			// No matches found, reset to beginning of the list and proceed as normal
 		}
 
+		// Loop through the list of connected devices
 		while (devIt != list.cend())
 		{
+			// List the details of each one
 			std::wcout << "Found HID device: " << devIt->description << ". Press y to select, anything else to skip: ";
 
 			auto c(Hook::getChar());
 
 			if (c == 'y')
 			{
+				// If the user picks this, break the list
 				break;
 			}
 
@@ -69,6 +78,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 		else
 		{
+			// Open the selected device
 			Hook::Hid::HidControllerDevice dev(*devIt);
 			dev.openDevice(true);
 
@@ -110,7 +120,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	return EXIT_SUCCESS;
 
 failure:
-	Hook::pause();
+	// Destroy the config instance
 	Hook::Config::destroy();
+	// Give the user a chance to read the message before quitting
+	Hook::pause();
 	return EXIT_FAILURE;
 }

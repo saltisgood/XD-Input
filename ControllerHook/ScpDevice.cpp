@@ -6,19 +6,8 @@
 
 using namespace Hook::Scp;
 
-bool UsbEndpointDirectionIn(INT32 addr)
-{
-	return (addr & 0x80) == 0x80;
-}
-
-bool UsbEndpointDirectionOut(INT32 addr)
-{
-	return (addr & 0x80) == 0;
-}
-
 BusDevice::BusDevice() :
 	mClass(),
-	mWinUsbHandle(INVALID_HANDLE_VALUE),
 	mIsActive(false),
 	mPath(),
 	mFileHandle(INVALID_HANDLE_VALUE),
@@ -45,13 +34,11 @@ BusDevice::~BusDevice()
 	}
 }
 
-bool BusDevice::open(int instance)
+bool BusDevice::open()
 {
 	std::wstring devicepath;
 
-	mWinUsbHandle = nullptr;
-
-	if (find(&mClass, devicepath, instance))
+	if (find(&mClass, devicepath, 0))
 	{
 		open(devicepath);
 	}
@@ -62,29 +49,10 @@ bool BusDevice::open(int instance)
 bool BusDevice::open(const std::wstring& path)
 {
 	mPath = path;
-	mWinUsbHandle = INVALID_HANDLE_VALUE;
 
 	if (getDeviceHandle(mPath))
 	{
 		mIsActive = true;
-
-		/* if (WinUsb_Initialize(mFileHandle, &mWinUsbHandle))
-		{
-			if (initDevice())
-			{
-				mIsActive = true;
-			}
-			else
-			{
-				WinUsb_Free(mWinUsbHandle);
-				mWinUsbHandle = INVALID_HANDLE_VALUE;
-			}
-		}
-		else
-		{
-			CloseHandle(mFileHandle);
-			mFileHandle = INVALID_HANDLE_VALUE;
-		} */
 	}
 
 	return mIsActive;
@@ -104,12 +72,6 @@ bool BusDevice::stop()
 
 	mIsActive = false;
 
-	if (mWinUsbHandle != INVALID_HANDLE_VALUE)
-	{
-		// Shouldn't happen
-		mWinUsbHandle = INVALID_HANDLE_VALUE;
-	}
-
 	if (mFileHandle != INVALID_HANDLE_VALUE)
 	{
 		CloseHandle(mFileHandle);
@@ -120,7 +82,7 @@ bool BusDevice::stop()
 	return true;
 }
 
-bool BusDevice::find(const GUID *target, std::wstring& path, int instance)
+bool BusDevice::find(const GUID *target, std::wstring& path, int instance) const
 {
 	HDEVINFO deviceInfoSet = SetupDiGetClassDevs(target, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
@@ -172,48 +134,7 @@ bool BusDevice::getDeviceHandle(const std::wstring& path)
 	return mFileHandle != INVALID_HANDLE_VALUE;
 }
 
-/*
-bool BusDevice::initDevice()
-{
-	USB_INTERFACE_DESCRIPTOR ifaceDescriptor;
-	WINUSB_PIPE_INFORMATION  pipeInfo;
-
-	if (WinUsb_QueryInterfaceSettings(mWinUsbHandle, 0, &ifaceDescriptor))
-	{
-		for (INT32 i = 0; i < ifaceDescriptor.bNumEndpoints; ++i)
-		{
-			WinUsb_QueryPipe(mWinUsbHandle, 0, static_cast<UCHAR>(i), &pipeInfo);
-
-			if (((pipeInfo.PipeType == USBD_PIPE_TYPE::UsbdPipeTypeBulk) & UsbEndpointDirectionIn(pipeInfo.PipeId)))
-			{
-				mBulkIn = pipeInfo.PipeId;
-				WinUsb_FlushPipe(mWinUsbHandle, mBulkIn);
-			}
-			else if (((pipeInfo.PipeType == USBD_PIPE_TYPE::UsbdPipeTypeBulk) & UsbEndpointDirectionOut(pipeInfo.PipeId)))
-			{
-				mBulkOut = pipeInfo.PipeId;
-				WinUsb_FlushPipe(mWinUsbHandle, mBulkOut);
-			}
-			else if ((pipeInfo.PipeType == USBD_PIPE_TYPE::UsbdPipeTypeInterrupt) & UsbEndpointDirectionIn(pipeInfo.PipeId))
-			{
-				mIntIn = pipeInfo.PipeId;
-				WinUsb_FlushPipe(mWinUsbHandle, mIntIn);
-			}
-			else if ((pipeInfo.PipeType == USBD_PIPE_TYPE::UsbdPipeTypeInterrupt) & UsbEndpointDirectionOut(pipeInfo.PipeId))
-			{
-				mIntOut = pipeInfo.PipeId;
-				WinUsb_FlushPipe(mWinUsbHandle, mIntOut);
-			}
-		}
-
-		return true;
-	}
-
-	return false;
-}
-*/
-
-bool BusDevice::transfer(void *input, size_t inputLen, void *output, size_t outputLen)
+bool BusDevice::transfer(void *input, size_t inputLen, void *output, size_t outputLen) const
 {
 	if (mIsActive)
 	{
@@ -231,7 +152,7 @@ bool BusDevice::transfer(void *input, size_t inputLen, void *output, size_t outp
 	return false;
 }
 
-bool BusDevice::plugin(int serial)
+bool BusDevice::plugin(int serial) const
 {
 	if (mIsActive)
 	{
@@ -252,7 +173,7 @@ bool BusDevice::plugin(int serial)
 	return false;
 }
 
-bool BusDevice::unplug(int serial)
+bool BusDevice::unplug(int serial) const
 {
 	if (mIsActive)
 	{
@@ -275,12 +196,10 @@ bool BusDevice::unplug(int serial)
 
 VirtualDevice &BusDevice::retrieveDevice()
 {
-#ifdef _DEBUG
 	if (!mIsActive)
 	{
 		throw std::runtime_error("Bus not yet active!");
 	}
-#endif
 
 	return mDevice;
 }

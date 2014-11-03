@@ -12,6 +12,8 @@
 
 #pragma region Helper
 
+// Helper function for getting the value of the ControllerState bitfields that represent
+// the state of the button enum
 inline uint8_t getButtonValue(Hook::ControllerState &state, Hook::Buttons butt)
 {
 #define HOOK_BUTT_ENUM(name) case Hook::Buttons::BUTTON_##name:
@@ -47,6 +49,8 @@ inline uint8_t getButtonValue(Hook::ControllerState &state, Hook::Buttons butt)
 	return 0;
 }
 
+// Helper function for setting the ControllerState bitfields with a value according to
+// their button enum
 inline void setButtonValue(Hook::ControllerState &state, Hook::Buttons butt, uint8_t val)
 {
 	switch (butt)
@@ -109,6 +113,7 @@ Hook::Remapper Hook::Remapper::create(const std::string& path)
 
 	std::string filePath(path);
 
+	// If the path doesn't end in .config, like the case of a process name, append it.
 	if (filePath.find(".config") == std::string::npos)
 	{
 		filePath += ".config";
@@ -122,6 +127,7 @@ Hook::Remapper Hook::Remapper::create(const std::string& path)
 	{
 		std::cout << filePath << " config file not found! Using default values." << std::endl;
 
+		// File not found or available, print the default template.
 		printTemplate(filePath);
 		rtn.mIsDefault = true;
 		return rtn;
@@ -182,16 +188,18 @@ bool Hook::Remapper::reread(const std::wstring &path, Hook::Remapper &map)
 {
 	std::wstring filePath(path);
 
+	// As above, if path doesn't end in .config, append it.
 	if (filePath.find(L".config") == std::string::npos)
 	{
 		filePath += L".config";
 	}
 
 	std::ifstream file(filePath);
+	// Check whether file is available
 	if (file.is_open())
 	{
 		file.close();
-
+		// If so, close it and recreate the object
 		map = create(filePath);
 		return true;
 	}
@@ -233,6 +241,11 @@ void Hook::Remapper::remapPriv(Hook::ControllerState &state) const
 
 #pragma endregion
 
+#pragma region Looping
+
+// Wait until a process in the given list has begun. The function checks whether any are running and if none are,
+// sleeps for half a second before trying again. If a process is found to be active it will be returned. The wait
+// can also be interrupted by a CTRL + SHIFT + END key hit. If that happens, the function returns the end iterator.
 std::forward_list<std::wstring>::const_iterator procWaitLoop(const std::forward_list<std::wstring> &procList)
 {
 	auto start(procList.cbegin());
@@ -256,6 +269,7 @@ std::forward_list<std::wstring>::const_iterator procWaitLoop(const std::forward_
 
 std::atomic<bool> earlyDie(false);
 
+// Helper function for cleaning up the thread in use
 inline void cleanupThread(std::thread &t)
 {
 	if (t.joinable())
@@ -268,6 +282,9 @@ inline void cleanupThread(std::thread &t)
 	}
 }
 
+// A function responsible for checking whether a process is still alive. Blocks completely and should be run on a
+// separate thread. Set earlyDie to true to kill it early. This function will set earlyDie to true itself if the
+// process in question did die and then exits.
 void processCheckerThreadLoop(std::wstring processName)
 {
 	while (!earlyDie.load() && Hook::checkProcessAlive(processName))
@@ -374,3 +391,5 @@ void Hook::loop(Hook::Hid::HidControllerDevice &realD, Hook::Scp::VirtualDevice 
 		}
 	}
 }
+
+#pragma endregion

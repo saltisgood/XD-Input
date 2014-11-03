@@ -6,14 +6,17 @@
 
 namespace Hook
 {
+	// An enum of controller buttons using Xbox 360 controller nomenclature
 	enum class Buttons
 	{
 		BUTTON_Y = 0, BUTTON_B = 1, BUTTON_A = 2, BUTTON_X = 3, BUTTON_LB = 4, BUTTON_RB = 5,
 		BUTTON_LT = 6, BUTTON_RT = 7, BUTTON_BACK = 8, BUTTON_START = 9, BUTTON_LS = 10,
 		BUTTON_RS = 11, INVALID
 	};
+	// The total number of valid buttons in the Hook::Buttons enum
 	const static unsigned int NUM_BUTTONS = 12;
 
+	// The bitfield of the secondary buttons, used in Hook::ControllerState
 	struct ButtonFieldSecondary
 	{
 		uint8_t hat_up : 1;
@@ -28,6 +31,7 @@ namespace Hook
 	};
 	static_assert(sizeof(ButtonFieldSecondary) == 1, "ButtonFieldSecondary overflows 1 byte!");
 
+	// The bitfield of the primary buttons, used in Hook::ControllerState
 	struct ButtonFieldPrimary
 	{
 		uint8_t left_shoulder : 1;
@@ -42,6 +46,8 @@ namespace Hook
 	};
 	static_assert(sizeof(ButtonFieldPrimary) == 1, "ButtonFieldPrimary overflows 1 byte!");
 
+	// The state of the controller that's used by the Scp driver. Call initialiseState(ControllerState&, unsigned int);
+	// before use to make sure it's in a valid state.
 	struct ControllerState
 	{
 		uint32_t magic;
@@ -67,11 +73,14 @@ namespace Hook
 		uint16_t unk2;
 		uint32_t unk3;
 	};
-	static_assert(sizeof(ControllerState) == 28, "ControllerState larger than 28 bytes!");
+	static_assert(sizeof(ControllerState) == 28, "ControllerState not exactly 28 bytes!");
 
+	// Get the ControllerState into a valid state for use. Valid values for controllerNum are 1-4.
 	void initialiseState(ControllerState& state, unsigned int controllerNum);
 
+	// Parse a phrase to get its Buttons enum form.
 	Buttons parseButtonString(const std::string& str);
+	// Turn a value of the Buttons enum into its string representation.
 	const std::string& getButtonString(Buttons butt);
 
 #pragma region inlines
