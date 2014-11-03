@@ -36,7 +36,7 @@ BusDevice::~BusDevice()
 
 bool BusDevice::open()
 {
-	std::wstring devicepath;
+	HOOK_TCHARSTR devicepath;
 
 	if (find(&mClass, devicepath, 0))
 	{
@@ -46,7 +46,7 @@ bool BusDevice::open()
 	return mIsActive;
 }
 
-bool BusDevice::open(const std::wstring& path)
+bool BusDevice::open(const HOOK_TCHARSTR& path)
 {
 	mPath = path;
 
@@ -82,7 +82,7 @@ bool BusDevice::stop()
 	return true;
 }
 
-bool BusDevice::find(const GUID *target, std::wstring& path, int instance) const
+bool BusDevice::find(const GUID *target, HOOK_TCHARSTR &path, int instance) const
 {
 	HDEVINFO deviceInfoSet = SetupDiGetClassDevs(target, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
@@ -128,7 +128,7 @@ bool BusDevice::find(const GUID *target, std::wstring& path, int instance) const
 	return false;
 }
 
-bool BusDevice::getDeviceHandle(const std::wstring& path)
+bool BusDevice::getDeviceHandle(const HOOK_TCHARSTR& path)
 {
 	mFileHandle = CreateFile(path.data(), (GENERIC_WRITE | GENERIC_READ), FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, 0);
 	return mFileHandle != INVALID_HANDLE_VALUE;

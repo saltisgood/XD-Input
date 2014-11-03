@@ -2,10 +2,10 @@
 #define __CTRLHOOK_HIDUTIL_H_
 
 #include "Controller.h"
+#include "Macros.h"
 
+#include <tchar.h>
 #include <guiddef.h>
-#include <string>
-#include <forward_list>
 
 namespace Hook
 {
@@ -15,9 +15,9 @@ namespace Hook
 		struct HidDevice
 		{
 			// The unique path to a HID. Can be used to open a stream to the device.
-			std::wstring path;
+			HOOK_TCHARSTR path;
 			// The description of the device.
-			std::wstring description;
+			HOOK_TCHARSTR description;
 		};
 
 		// A class used to control an actual HID.
@@ -59,7 +59,7 @@ namespace Hook
 		private:
 			// Helper function to open a handle to a HID. Use isExclusive = true, to hide the device from
 			// other processes.
-			static WIN_HANDLE openHandle(const wchar_t *path, bool isExclusive);
+			static WIN_HANDLE openHandle(const TCHAR *path, bool isExclusive);
 
 			// Get the attributes associated with a device available via the handle.
 			static HIDD_ATTRIBUTES getDeviceAttributes(WIN_HANDLE handle);

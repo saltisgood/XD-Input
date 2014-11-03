@@ -89,6 +89,7 @@
     <ClInclude Include="Controller.h" />
     <ClInclude Include="HID_Util.h" />
     <ClInclude Include="Looper.h" />
+    <ClInclude Include="Macros.h" />
     <ClInclude Include="Processes.h" />
     <ClInclude Include="ScpDevice.h" />
     <ClInclude Include="stdafx.h" />

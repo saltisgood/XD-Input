@@ -184,14 +184,14 @@ Hook::Remapper Hook::Remapper::create(const std::string& path)
 	return rtn;
 }
 
-bool Hook::Remapper::reread(const std::wstring &path, Hook::Remapper &map)
+bool Hook::Remapper::reread(const HOOK_TCHARSTR &path, Hook::Remapper &map)
 {
-	std::wstring filePath(path);
+	HOOK_TCHARSTR filePath(path);
 
 	// As above, if path doesn't end in .config, append it.
-	if (filePath.find(L".config") == std::string::npos)
+	if (filePath.find(TEXT(".config")) == std::string::npos)
 	{
-		filePath += L".config";
+		filePath += TEXT(".config");
 	}
 
 	std::ifstream file(filePath);
@@ -246,7 +246,7 @@ void Hook::Remapper::remapPriv(Hook::ControllerState &state) const
 // Wait until a process in the given list has begun. The function checks whether any are running and if none are,
 // sleeps for half a second before trying again. If a process is found to be active it will be returned. The wait
 // can also be interrupted by a CTRL + SHIFT + END key hit. If that happens, the function returns the end iterator.
-std::forward_list<std::wstring>::const_iterator procWaitLoop(const std::forward_list<std::wstring> &procList)
+std::forward_list<HOOK_TCHARSTR>::const_iterator procWaitLoop(const std::forward_list<HOOK_TCHARSTR> &procList)
 {
 	auto start(procList.cbegin());
 	auto end(procList.cend());
@@ -285,7 +285,7 @@ inline void cleanupThread(std::thread &t)
 // A function responsible for checking whether a process is still alive. Blocks completely and should be run on a
 // separate thread. Set earlyDie to true to kill it early. This function will set earlyDie to true itself if the
 // process in question did die and then exits.
-void processCheckerThreadLoop(std::wstring processName)
+void processCheckerThreadLoop(HOOK_TCHARSTR processName)
 {
 	while (!earlyDie.load() && Hook::checkProcessAlive(processName))
 	{
@@ -305,7 +305,7 @@ void Hook::loop(Hook::Hid::HidControllerDevice &realD, Hook::Scp::VirtualDevice 
 	bool suicide(hasProcList ? Config::get()->shouldEndOnGameProcDeath() : false);
 	std::thread worker;
 
-	std::wstring activeProc(byteToWideString(Remapper::DEFAULT_PATH));
+	HOOK_TCHARSTR activeProc(HOOK_TCHARIFY(Remapper::DEFAULT_PATH));
 
 	if (!hasProcList)
 	{
@@ -322,7 +322,7 @@ void Hook::loop(Hook::Hid::HidControllerDevice &realD, Hook::Scp::VirtualDevice 
 		}
 
 		activeProc = *procIter;
-		std::wcout << "Detected startup of " << activeProc << "." << std::endl;
+		HOOK_TCHAROUT << "Detected startup of " << activeProc << "." << std::endl;
 
 		mapper = Remapper::create(activeProc);
 

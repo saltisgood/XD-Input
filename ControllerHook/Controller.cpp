@@ -54,6 +54,6 @@ const std::string &Hook::getButtonString(Hook::Buttons butt)
 	else HOOK_BUTT_STR(RS)
 
 	return BUTTON_STR_INVALID;
-
+	
 #undef HOOK_BUTT_STR
 }

@@ -1,8 +1,7 @@
 #ifndef __CTRLHOOK_CONFIG_H_
 #define __CTRLHOOK_CONFIG_H_
 
-#include <string>
-#include <forward_list>
+#include "Macros.h"
 
 namespace Hook
 {
@@ -50,7 +49,7 @@ namespace Hook
 		// Check whether the user has selected a list of processes to use the program for.
 		bool hasProcessList() const;
 		// Get the list of processes to user the program for. If .hasProcessList() returns false, the list is empty.
-		const std::forward_list<std::wstring> &getProcessList() const;
+		const std::forward_list<HOOK_TCHARSTR> &getProcessList() const;
 
 		// Check whether the program should quit upon the process that it was being used with ends. Only valid if
 		// .hasProcessList() returns true.
@@ -65,7 +64,7 @@ namespace Hook
 		unsigned short mFavVendor;
 		unsigned short mFavProd;
 
-		std::forward_list<std::wstring> mProcList;
+		std::forward_list<HOOK_TCHARSTR> mProcList;
 
 		bool mEndWithGameProc;
 	};
@@ -120,7 +119,7 @@ namespace Hook
 		return !mProcList.empty();
 	}
 
-	inline const std::forward_list<std::wstring> &Config::getProcessList() const
+	inline const std::forward_list<HOOK_TCHARSTR> &Config::getProcessList() const
 	{
 		return mProcList;
 	}

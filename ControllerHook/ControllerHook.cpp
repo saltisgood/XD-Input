@@ -17,7 +17,7 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	// Get the list of HIDs
 	auto list = Hook::Hid::enumerateHIDDevices();
-
+	
 	if (list.empty())
 	{
 		Hook::errorMessage("No HID devices found!");
@@ -58,7 +58,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		while (devIt != list.cend())
 		{
 			// List the details of each one
-			std::wcout << "Found HID device: " << devIt->description << ". Press y to select, anything else to skip: ";
+			HOOK_TCHAROUT << "Found HID device: " << devIt->description << ". Press y to select, anything else to skip: ";
 
 			auto c(Hook::getChar());
 

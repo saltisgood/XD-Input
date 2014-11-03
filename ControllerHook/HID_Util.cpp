@@ -15,7 +15,7 @@ std::forward_list<HidDevice> Hook::Hid::enumerateHIDDevices()
 	return enumerateDevices(HID_GUID);
 }
 
-std::wstring getDevicePath(HDEVINFO deviceInfoSet, SP_DEVICE_INTERFACE_DATA &deviceInterfaceData)
+HOOK_TCHARSTR getDevicePath(HDEVINFO deviceInfoSet, SP_DEVICE_INTERFACE_DATA &deviceInterfaceData)
 {
 	DWORD bufferSize = 0;
 
@@ -26,14 +26,14 @@ std::wstring getDevicePath(HDEVINFO deviceInfoSet, SP_DEVICE_INTERFACE_DATA &dev
 
 	SetupDiGetDeviceInterfaceDetail(deviceInfoSet, &deviceInterfaceData, detailDataBuffer, bufferSize, &bufferSize, NULL);
 
-	std::wstring rt(detailDataBuffer->DevicePath);
+	HOOK_TCHARSTR rt(detailDataBuffer->DevicePath);
 
 	delete detailDataBuffer;
 
 	return rt;
 }
 
-std::wstring getBusReportedDeviceDescription(HDEVINFO deviceInfoSet, SP_DEVINFO_DATA &devInfoData)
+HOOK_TCHARSTR getBusReportedDeviceDescription(HDEVINFO deviceInfoSet, SP_DEVINFO_DATA &devInfoData)
 {
 	BYTE descriptionBuffer[1024];
 
@@ -61,27 +61,27 @@ std::wstring getBusReportedDeviceDescription(HDEVINFO deviceInfoSet, SP_DEVINFO_
 
 	if (result != FALSE)
 	{
-		return std::wstring(reinterpret_cast<wchar_t *>(descriptionBuffer));
+		return HOOK_TCHARSTR(reinterpret_cast<TCHAR *>(descriptionBuffer));
 	}
 
-	return std::wstring();
+	return HOOK_TCHARSTR();
 }
 
-std::wstring getDeviceDescription(HDEVINFO deviceInfoSet, SP_DEVINFO_DATA &deviceInfoData)
+HOOK_TCHARSTR getDeviceDescription(HDEVINFO deviceInfoSet, SP_DEVINFO_DATA &deviceInfoData)
 {
 	BYTE descriptionBuffer[1024];
 
 	DWORD type(0);
 	DWORD requiredSize(0);
 
-	BOOL result = SetupDiGetDeviceRegistryPropertyW(deviceInfoSet, &deviceInfoData, SPDRP_DEVICEDESC, &type, descriptionBuffer, 1024, &requiredSize);
+	BOOL result = SetupDiGetDeviceRegistryProperty(deviceInfoSet, &deviceInfoData, SPDRP_DEVICEDESC, &type, descriptionBuffer, 1024, &requiredSize);
 
 	if (result != FALSE)
 	{
-		return std::wstring(reinterpret_cast<wchar_t *>(descriptionBuffer));
+		return HOOK_TCHARSTR(reinterpret_cast<TCHAR *>(descriptionBuffer));
 	}
 
-	return std::wstring();
+	return HOOK_TCHARSTR();
 }
 
 std::forward_list<HidDevice> Hook::Hid::enumerateDevices(const GUID &guid)
@@ -121,8 +121,8 @@ std::forward_list<HidDevice> Hook::Hid::enumerateDevices(const GUID &guid)
 			{
 				++deviceInterfaceIndex;
 
-				std::wstring devicePath = getDevicePath(deviceInfoSet, deviceInterfaceData);
-				std::wstring description = getBusReportedDeviceDescription(deviceInfoSet, deviceInfoData);
+				HOOK_TCHARSTR devicePath = getDevicePath(deviceInfoSet, deviceInterfaceData);
+				HOOK_TCHARSTR description = getBusReportedDeviceDescription(deviceInfoSet, deviceInfoData);
 
 				if (description.empty())
 				{

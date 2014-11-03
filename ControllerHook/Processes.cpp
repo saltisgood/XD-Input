@@ -3,8 +3,8 @@
 #include <Windows.h>
 #include <Psapi.h>
 
-std::forward_list<std::wstring>::const_iterator Hook::checkProcessActive(const std::forward_list<std::wstring>::const_iterator &start,
-	const std::forward_list<std::wstring>::const_iterator &end)
+std::forward_list<HOOK_TCHARSTR>::const_iterator Hook::checkProcessActive(const std::forward_list<HOOK_TCHARSTR>::const_iterator &start,
+	const std::forward_list<HOOK_TCHARSTR>::const_iterator &end)
 {
 	DWORD processes[1024];
 	DWORD needed;
@@ -32,7 +32,7 @@ std::forward_list<std::wstring>::const_iterator Hook::checkProcessActive(const s
 				{
 					GetModuleBaseName(hProc, hMod, procName, sizeof(procName) / sizeof(TCHAR));
 
-					std::wstring wstrName(procName);
+					HOOK_TCHARSTR wstrName(procName);
 					
 					for (auto iter = start; iter != end; ++iter)
 					{
@@ -51,9 +51,9 @@ std::forward_list<std::wstring>::const_iterator Hook::checkProcessActive(const s
 	return end;
 }
 
-bool Hook::checkProcessAlive(const std::wstring &proc)
+bool Hook::checkProcessAlive(const HOOK_TCHARSTR &proc)
 {
-	std::forward_list<std::wstring> list;
+	std::forward_list<HOOK_TCHARSTR> list;
 	list.push_front(proc);
 
 	return checkProcessActive(list.cbegin(), list.cend()) != list.cend();

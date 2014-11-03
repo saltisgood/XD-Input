@@ -35,7 +35,7 @@ HidControllerDevice::~HidControllerDevice()
 	delete[] mInputData;
 }
 
-HidControllerDevice::WIN_HANDLE HidControllerDevice::openHandle(const wchar_t *path, bool isExcl)
+HidControllerDevice::WIN_HANDLE HidControllerDevice::openHandle(const TCHAR *path, bool isExcl)
 {
 	if (isExcl)
 	{

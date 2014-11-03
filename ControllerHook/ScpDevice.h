@@ -1,10 +1,10 @@
 #ifndef __CTRLHOOK_SCPDEVICE_H_
 #define __CTRLHOOK_SCPDEVICE_H_
 
-#include <guiddef.h>
-#include <string>
-
+#include "Macros.h"
 #include "Controller.h"
+
+#include <guiddef.h>
 
 namespace Hook
 {
@@ -48,7 +48,7 @@ namespace Hook
 			bool open();
 		private:
 			// Open a connection to a device at a particular path
-			bool open(const std::wstring& path);
+			bool open(const HOOK_TCHARSTR& path);
 
 		public:
 			// Plugin the VJD to the Scp driver. If already active, does nothing.
@@ -64,10 +64,10 @@ namespace Hook
 		private:
 			// Find a device with the given GUID and write the device's path into outPath. Use instance to
 			// control the instance of the GUID to choose. Returns true if a device was found, false otherwise.
-			bool find(const GUID *target, std::wstring& outPath, int instance = 0) const;
+			bool find(const GUID *target, HOOK_TCHARSTR& outPath, int instance = 0) const;
 
 			// Open up a connection to the device at the given path.
-			bool getDeviceHandle(const std::wstring& path);
+			bool getDeviceHandle(const HOOK_TCHARSTR& path);
 
 			// Plugin a device to the Scp driver. Valid serial nos: 1-4.
 			bool plugin(int serial) const;
@@ -80,7 +80,7 @@ namespace Hook
 		private:
 			GUID mClass;
 			bool mIsActive;
-			std::wstring mPath;
+			HOOK_TCHARSTR mPath;
 			void *mFileHandle;
 			VirtualDevice mDevice;
 		};

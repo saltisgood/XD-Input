@@ -23,7 +23,7 @@ namespace Hook
 		// Reset the given Remapper object with updated info from the config file at the
 		// specified path. If the file can't be found or read from, the object is left
 		// unchanged and the function returns false, true otherwise.
-		static bool reread(const std::wstring &filePath, Remapper &mapper);
+		static bool reread(const HOOK_TCHARSTR &filePath, Remapper &mapper);
 
 		// Print the default config file form at the specified path.
 		static void printTemplate(const std::string& filePath);
